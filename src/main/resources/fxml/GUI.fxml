@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.Cursor?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ListView?>
+<?import javafx.scene.control.Tab?>
+<?import javafx.scene.control.TabPane?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.Pane?>
+<?import javafx.scene.text.Font?>
+
+<Pane fx:id="pane" maxHeight="-Infinity" maxWidth="-Infinity" onMouseDragged="#windowDragged" onMousePressed="#windowPressed" prefHeight="514.0" prefWidth="450.0" xmlns="http://javafx.com/javafx/8.0.172-ea" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.Controller">
+   <children>
+      <Label alignment="TOP_CENTER" contentDisplay="TOP" layoutX="23.0" layoutY="37.0" prefHeight="33.0" prefWidth="407.0" text="YuTyub Downloader" textAlignment="CENTER" textFill="#198e70" textOverrun="CLIP">
+         <cursor>
+            <Cursor fx:constant="DEFAULT" />
+         </cursor>
+         <font>
+            <Font name="Gadugi" size="25.0" />
+         </font>
+      </Label>
+      <Label alignment="TOP_CENTER" contentDisplay="TOP" layoutX="22.0" layoutY="73.0" prefHeight="25.0" prefWidth="407.0" text="Kostenlos | Sicher | Schnell" textAlignment="CENTER" textFill="#7c7a7a" textOverrun="CLIP">
+         <cursor>
+            <Cursor fx:constant="DEFAULT" />
+         </cursor>
+         <font>
+            <Font name="Gadugi" size="12.0" />
+         </font>
+      </Label>
+      <Button fx:id="downloadButton" layoutX="108.0" layoutY="145.0" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" onAction="#downloadButtonAction" prefHeight="45.0" prefWidth="234.0" style="-fx-background-color: rgb(25,142,112);" textAlignment="CENTER">
+         <font>
+            <Font size="50.0" />
+         </font>
+         <graphic>
+            <Label prefHeight="52.0" prefWidth="147.0" text="Downloaden" textAlignment="CENTER" textFill="WHITE">
+               <font>
+                  <Font name="Gadugi" size="20.0" />
+               </font>
+               <graphic>
+                  <ImageView fitHeight="21.0" fitWidth="18.0" pickOnBounds="true" preserveRatio="true">
+                     <image>
+                        <Image url="@../pictures/Very-Basic-Document-icon.png" />
+                     </image>
+                  </ImageView>
+               </graphic>
+            </Label>
+         </graphic></Button>
+      <Button fx:id="deleteButton" layoutX="174.0" layoutY="454.0" mnemonicParsing="false" onAction="#deleteDataButton" prefHeight="25.0" prefWidth="106.0" style="-fx-background-color: rgb(25,142,112);" textAlignment="CENTER">
+         <font>
+            <Font size="22.0" />
+         </font>
+         <graphic>
+            <Label prefHeight="6.0" prefWidth="80.0" text="Löschen" textAlignment="CENTER" textFill="WHITE">
+               <font>
+                  <Font name="Gadugi" size="15.0" />
+               </font>
+               <graphic>
+                  <ImageView fitHeight="20.0" fitWidth="18.0" pickOnBounds="true" preserveRatio="true">
+                     <image>
+                        <Image url="@../pictures/Industry-Trash-2-icon.png" />
+                     </image>
+                  </ImageView>
+               </graphic>
+            </Label>
+         </graphic>
+      </Button>
+      <Button fx:id="closeButton" layoutX="385.0" layoutY="8.0" mnemonicParsing="false" onAction="#closeProgram" prefHeight="20.0" prefWidth="37.0" stylesheets="@../css/XButton.css">
+         <graphic>
+            <ImageView fitHeight="25.0" fitWidth="31.0" nodeOrientation="INHERIT" pickOnBounds="true" preserveRatio="true">
+               <image>
+                  <Image url="@../pictures/transparentLight45%20-%20Kopie.png" />
+               </image>
+            </ImageView>
+         </graphic></Button>
+      <Button fx:id="minimizeButton" alignment="TOP_CENTER" layoutX="329.0" layoutY="12.0" mnemonicParsing="false" onAction="#minimizeWindow" prefHeight="25.0" prefWidth="37.0" stylesheets="@../css/XButton.css" text="▬" textAlignment="CENTER">
+         <font>
+            <Font name="System Italic" size="11.0" />
+         </font></Button>
+      <Label fx:id="idLabel" layoutX="28.0" layoutY="16.0" text="v1.0.0" />
+      <TabPane layoutX="42.0" layoutY="206.0" prefHeight="236.0" prefWidth="366.0" stylesheets="@../css/TabPane.css" tabClosingPolicy="UNAVAILABLE">
+        <tabs>
+          <Tab text="Download List">
+               <content>
+                  <ListView fx:id="downloadList" prefHeight="206.0" prefWidth="366.0" style="-fx-background-color: rgb(25,142,112);" />
+               </content>
+            </Tab>
+        </tabs>
+      </TabPane>
+      <TextField fx:id="urlField" layoutX="23.0" layoutY="105.0" prefHeight="25.0" prefWidth="407.0" promptText="Insert Youtube URL e.g https://www.youtube.com/watch?v=31sdfg68s123sdf" />
+   </children>
+</Pane>
