@@ -47,7 +47,7 @@ public class MainClass{
                 e.printStackTrace();
             }
             // Enter something to search for
-            urlLink.sendKeys("https://www.youtube.com/watch?v=aBc-lKqyNmE&list=RDC8BC53Jd1Mg&index=23");
+            urlLink.sendKeys("https://www.youtube.com/watch?v=8kL2pvoiS0k&list=RDC8BC53Jd1Mg&index=14");
 
 
             try {
@@ -57,36 +57,37 @@ public class MainClass{
             }
             wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//div[@id='convertBtn']"))).click();
             wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//a[@id='dbtn-mp3128']"))).click();
-           String downloadUrl= wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//a[@class='btn btn-success']"))).getAttribute("href");
+            String downloadUrl= wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//a[@class='btn btn-success']"))).getAttribute("href");
+            String songName =  wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//div[@class='c-result__video-title']"))).getText();
+            songName = songName.replaceAll("\\W+","");
+
             URL url = null;
             InputStream reader=null;
             FileOutputStream fos=null;
             try {
-                url = new URL(downloadUrl);
-                reader = url.openStream();
-                fos = new FileOutputStream("G:/Users/Progamer/Desktop/test.mp3");
-                byte[] buffer = new byte[8192];
-                int read;
-                while((read = reader.read(buffer)) != -1){
-                    fos.write(buffer,0,read);
-                }
-                System.out.println("Download done! Please check your path.");
-            } catch (IOException e) {
+                    url = new URL(downloadUrl);
+                    reader = url.openStream();
+                    fos = new FileOutputStream(System.getProperty("user.dir")+"\\"+""+songName+".mp3");
+                    byte[] buffer = new byte[8192];
+                    int read;
+                    while((read = reader.read(buffer)) != -1){
+                        fos.write(buffer,0,read);
+                    }
+                    System.out.println("Download done! Please check your path.");
+                } catch (IOException e) {
                 e.printStackTrace();
-            }finally{
-                try{
-                    if(reader != null)
-                        reader.close();
+                }finally{
+                    try{
+                        if(reader != null)
+                           reader.close();
 
-                    if(fos != null)
-                        fos.close();
+                        if(fos != null)
+                           fos.close();
 
-                }catch(Exception e){
+                    }catch(Exception e){
                     e.printStackTrace();
+                    }
                 }
-            }
-
-
         }
 
 }
