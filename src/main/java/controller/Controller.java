@@ -25,18 +25,14 @@ import java.util.List;
 
 //TODO: reject button funktioniert irgendwieeeeeee   nicht ganz richtig. es bleibt i.wie hängen. versuche mit 3 gb!
 public class Controller implements Serializable {
-    private List<File> fileList;
-    private FileChooser fileChooser;
-    private Model model;
 
+    private Model model;
     private Controller controller;
-    private Button accept,reject;
     private Task<Void> downloadTask;
     private Thread downloadThread;
     private HBox hbox;
     private ProgressBar pbar;
     @FXML private Pane pane;
-    @FXML private ListView<File> uploadList;
     @FXML private Button deleteButton;
     @FXML private Button downloadButton;
     @FXML private ListView<String> downloadList;
@@ -46,7 +42,7 @@ public class Controller implements Serializable {
     public void initialize(){
         model = new Model(downloadList);
         controller = this;
-        uploadList.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
+        downloadList.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
 
         this.getDownloadList().setCellFactory(c -> {
             ListCell<String> cell = new ListCell<String>() {
@@ -68,14 +64,13 @@ public class Controller implements Serializable {
 
 
                             hbox.getChildren().clear();
-                            hbox.getChildren().addAll(pbar, reject);
+                            hbox.getChildren().add(pbar);
                             setText(" " + myObject);
                             setGraphic(hbox);
 
                             pbar.progressProperty().bind(downloadTask.progressProperty());
                             downloadThread.start();
                             if (downloadThread.isAlive()) {
-                                hbox.getChildren().remove(reject);
 
                                 pbar.progressProperty().addListener(new ChangeListener<Number>() {
                                     @Override
@@ -122,22 +117,18 @@ public class Controller implements Serializable {
         });
     }
     @FXML
-    private void downloadButtonAction() { this.model.downloadButtonAction(urlField); }
+    private void downloadButtonAction() { this.model.downloadButtonProcess(urlField); }
     @FXML
-    public void deleteDataButton(){
-        if(!this.model.getFileArrayList().isEmpty()) {
-            ObservableList<File> selectedFiles = this.uploadList.getSelectionModel().getSelectedItems();
-            System.err.println("DELETE FROM LIST :: " + selectedFiles);
-            this.model.getFileArrayList().removeAll(selectedFiles);
-        }
+    public void deleteButtonAction(){
+       this.model.deleteButtonProcess();
     }
     @FXML
-    public void windowDragged(MouseEvent event){ this.model.windowDragged(event);}
+    public void windowDragged(MouseEvent event){ this.model.windowDraggedProcess(event);}
     @FXML
-    public void windowPressed(MouseEvent event){ this.model.windowPressed(event); }
+    public void windowPressed(MouseEvent event){ this.model.windowPressedProcess(event); }
 
     @FXML
-    public void minimizeWindow(){this.model.minimizeWindow(); }
+    public void minimizeWindow(){this.model.minimizeWindowProcess(); }
     @FXML
     public void closeProgram(){
         System.exit(0);

@@ -17,79 +17,10 @@ import java.net.URL;
 import java.util.Scanner;
 
 public class MainClass{
-        private static WebDriver driver;
-        private static WebDriverWait wait;
-        private static Scanner input;
+
 
         public static void main(String []args) {
-            // Create a new instance of the Firefox driver
-            // Notice that the remainder of the code relies on the interface,
-            // not the implementation.
-            System.setProperty("webdriver.chrome.driver","src/main/resources/chromedriver.exe");
-            input = new Scanner(System.in);
-            ChromeOptions options = new ChromeOptions();
-            options.addArguments("headless");
-            //options.addArguments("window-size=1200x600");
-            driver = new ChromeDriver(options);
-            wait = new WebDriverWait(driver,2500);
-            // And now use this to visit Google
-            driver.get("https://www.youtubeconverter.io/");
 
-            //wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//a[@href='/accounts/login/?source=auth_switcher']"))).click();
-            try {
-                Thread.sleep(2000);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-            // Find the yotuubeLink Input
-            WebElement urlLink =driver.findElement(By.xpath("//input[@class='url-input']"));
-            try {
-                Thread.sleep(2000);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-            // Enter something to search for
-            urlLink.sendKeys("https://www.youtube.com/watch?v=8kL2pvoiS0k&list=RDC8BC53Jd1Mg&index=14");
-
-
-            try {
-                Thread.sleep(2000);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-            wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//div[@id='convertBtn']"))).click();
-            wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//a[@id='dbtn-mp3128']"))).click();
-            String downloadUrl= wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//a[@class='btn btn-success']"))).getAttribute("href");
-            String songName =  wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//div[@class='c-result__video-title']"))).getText();
-            songName = songName.replaceAll("\\W+","");
-
-            URL url = null;
-            InputStream reader=null;
-            FileOutputStream fos=null;
-            try {
-                    url = new URL(downloadUrl);
-                    reader = url.openStream();
-                    fos = new FileOutputStream(System.getProperty("user.dir")+"\\"+""+songName+".mp3");
-                    byte[] buffer = new byte[8192];
-                    int read;
-                    while((read = reader.read(buffer)) != -1){
-                        fos.write(buffer,0,read);
-                    }
-                    System.out.println("Download done! Please check your path.");
-                } catch (IOException e) {
-                e.printStackTrace();
-                }finally{
-                    try{
-                        if(reader != null)
-                           reader.close();
-
-                        if(fos != null)
-                           fos.close();
-
-                    }catch(Exception e){
-                    e.printStackTrace();
-                    }
-                }
         }
 
 }
