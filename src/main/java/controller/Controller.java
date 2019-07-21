@@ -33,6 +33,7 @@ public class Controller implements Serializable {
     private HBox hbox;
     private ProgressBar pbar;
     private String currentYoutubeLink="";
+    private boolean canProcess=true;
     @FXML private Pane pane;
     @FXML private Button deleteButton;
     @FXML private Button downloadButton;
@@ -49,7 +50,7 @@ public class Controller implements Serializable {
             ListCell<String> cell = new ListCell<String>(){
                 @Override
                 protected void updateItem(String newItem, boolean b){
-                super.updateItem(newItem,newItem == null || b);
+                super.updateItem(newItem,b);
 
                 if (newItem != null) {
                     currentYoutubeLink = newItem;
@@ -96,7 +97,6 @@ public class Controller implements Serializable {
                     }).start();
                         setText(" " + currentYoutubeLink);
                         setGraphic(hbox);
-
                 }else{
                     setText("");
                     setGraphic(null);
