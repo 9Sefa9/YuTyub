@@ -32,7 +32,7 @@ public class Controller implements Serializable {
     private Thread downloadThread;
     private HBox hbox;
     private ProgressBar pbar;
-    private boolean canProcess=true;
+    private String currentYoutubeLink="";
     @FXML private Pane pane;
     @FXML private Button deleteButton;
     @FXML private Button downloadButton;
@@ -48,7 +48,8 @@ public class Controller implements Serializable {
         this.getDownloadList().setCellFactory(lv ->{
             ListCell<String> cell = new ListCell<>();
             cell.itemProperty().addListener((obs, oldItem, newItem) -> {
-                if (newItem != null && canProcess) {
+                if (newItem != null && !newItem.equals(this.currentYoutubeLink)) {
+                    this.currentYoutubeLink = newItem;
                     System.out.println("Adding " +newItem+" to downloadList");
 
                     try {
@@ -74,7 +75,7 @@ public class Controller implements Serializable {
                         pbar.progressProperty().addListener(new ChangeListener<Number>() {
                             @Override
                             public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
-                                cell.setText(" " + (newValue.doubleValue() * 100) + "%/100%" + " name: " + newItem);
+                                cell.setText(" " + (newValue.doubleValue() * 100) + "%/100%" + " name: " + currentYoutubeLink);
                             }
                         });
                     }
@@ -100,21 +101,19 @@ public class Controller implements Serializable {
                             }
                         }
                     }).start();
-                    canProcess = false;
 
-                }else{
-                    cell.setText("");
-                    cell.setGraphic(null);
                 }
             });
             cell.emptyProperty().addListener((obss, wasEmpty, isEmpty) -> {
                 if (isEmpty) {
+                    cell.setText("");
                     cell.setGraphic(null);
                 } else {
+                    cell.setText(" "+this.currentYoutubeLink);
                     cell.setGraphic(hbox);
                 }
             });
-            cell.setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
+
             return cell ;
         });
     }

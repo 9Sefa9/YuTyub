@@ -93,7 +93,6 @@ public class DownloadClient extends Task<Void> {
                 fos.write(buffer, 0, tmp);
                 progressIndexL+=tmp;
                 updateProgress(progressIndexL,currentFileSize);
-                System.out.println(progressIndexL+"  /  "+currentFileSize);
             }
 
             System.out.println("Download done! Please check your path."+ System.getProperty("user.dir")+"/"+""+songName+".mp3");
@@ -104,7 +103,6 @@ public class DownloadClient extends Task<Void> {
                 //falls file vollständig runtergeladen
                 if(progressIndexL == currentFileSize){
                     // lösche es aus der Liste, da beendet. Vielleicht eine bessere beschreibung ?
-                    System.out.println("isDone :: ");
                     done();
                 }else if (progressIndexL != currentFileSize){
                     cancel();
