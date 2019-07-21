@@ -18,6 +18,8 @@ public class DownloadClient extends Task<Void> {
     private String currentYoutubeLink;
     private int currentFileSize;
     private Long progressIndexL;
+    private WebDriver driver;
+    private WebDriverWait wait;
 
     public DownloadClient(String currentYoutubeLink, String currentYoutubeSongName){
         this.currentYoutubeLink = currentYoutubeLink;
@@ -37,8 +39,8 @@ public class DownloadClient extends Task<Void> {
 
         ChromeOptions options = new ChromeOptions();
         // options.addArguments("headless");
-        WebDriver driver = new ChromeDriver(options);
-        WebDriverWait wait = new WebDriverWait(driver, 2500);
+        driver = new ChromeDriver(options);
+        wait = new WebDriverWait(driver, 2500);
         driver.get("https://www.youtubeconverter.io/");
 
         try {
@@ -102,6 +104,12 @@ public class DownloadClient extends Task<Void> {
                     fos.close();
                 if(reader!=null)
                     reader.close();
+                if(driver!=null){
+                    driver.quit();
+                }
+                if(wait!=null){
+                    wait=null;
+                }
 
             }catch (Exception e){
                 e.printStackTrace();

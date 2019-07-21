@@ -6,6 +6,7 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
+import model.DownloadClient;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;

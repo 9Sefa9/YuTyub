@@ -27,6 +27,9 @@ import java.net.Socket;
 import java.util.ArrayList;
 import java.util.Observable;
 import java.util.Random;
+import java.util.concurrent.Callable;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 public class Model {
     //fileArrayList
@@ -40,59 +43,68 @@ public class Model {
         downloadList.setItems(fileArrayList);
     }
     public void downloadButtonProcess(TextField urlField) {
+        synchronized (fileArrayList) {
         try {
+                //Wenn der Eingefügt Link nicht leer ist, ein watch? beinhaltet und nicht dem vorgänger entspricht, also bereits in der Liste ist : trage ein in die ListView.
+                if (!urlField.getText().isEmpty() && urlField.getText().contains("watch?") && !currentYoutubeLink.equals(urlField.getText())) {
 
-            //Wenn der Eingefügt Link nicht leer ist, ein watch? beinhaltet und nicht dem vorgänger entspricht, also bereits in der Liste ist : trage ein in die ListView.
-            if(!urlField.getText().isEmpty() && urlField.getText().contains("watch?") && !currentYoutubeLink.equals(urlField.getText())){
+                    currentYoutubeLink = urlField.getText();
+                    currentYoutubeSongName = Executors.newSingleThreadExecutor().submit(new Callable<String>() {
+                        @Override
+                        public String call() throws Exception {
+                            return determineTitle(currentYoutubeLink);
+                        }
+                    }).get();
 
-                currentYoutubeLink = urlField.getText();
-                currentYoutubeSongName = determineTitle(currentYoutubeLink);
-                System.out.println("Adding " +currentYoutubeSongName+" to downloadList");
-                downloadTask = new DownloadClient(currentYoutubeLink, currentYoutubeSongName);
-                Thread downloadThread = new Thread(downloadTask);
-                HBox hbox = new HBox();
-                ProgressBar pbar = new ProgressBar();
-                text = new Text();
-                pbar.setMinHeight(34);
-                hbox.getChildren().clear();
-                hbox.getChildren().add(pbar);
-                text.setText(" "+currentYoutubeSongName);
+                    //currentYoutubeSongName = new Future<String>()  determineTitle(currentYoutubeLink);
+                    System.out.println("Adding " + currentYoutubeSongName + " to downloadList");
+                    downloadTask = new DownloadClient(currentYoutubeLink, currentYoutubeSongName);
+                    Thread downloadThread = new Thread(downloadTask);
+                    HBox hbox = new HBox();
+                    ProgressBar pbar = new ProgressBar();
+                    text = new Text();
+                    pbar.setMinHeight(34);
+                    hbox.getChildren().clear();
+                    hbox.getChildren().add(pbar);
+                    text.setText(" " + currentYoutubeSongName);
 
-                hbox.getChildren().clear();
-                hbox.getChildren().addAll(pbar,text);
+                    hbox.getChildren().clear();
+                    hbox.getChildren().addAll(pbar, text);
 
-                fileArrayList.add(hbox);
+                    fileArrayList.add(hbox);
 
-                pbar.progressProperty().bind(downloadTask.progressProperty());
-                downloadThread.start();
+                    pbar.progressProperty().bind(downloadTask.progressProperty());
+                    downloadThread.start();
 
-                if (downloadThread.isAlive()) {
-                    pbar.progressProperty().addListener((observable, oldValue, newValue) -> {
-                        text.setText(" " + String.format("%.02f",(newValue.doubleValue() * 100)) + "%/100%" + " name: " + currentYoutubeSongName);
-                    });
+                    if (downloadThread.isAlive()) {
+                        pbar.progressProperty().addListener((observable, oldValue, newValue) -> {
+                            text.setText(" " + String.format("%.02f", (newValue.doubleValue() * 100)) + "%/100%" + " name: " + currentYoutubeSongName);
+                        });
+                    }
+
+                    new Thread(() -> {
+                        while (true) {
+                            if (downloadTask.isDone()) {
+                                Platform.runLater(() -> {
+                                    text.setText("DONE " + currentYoutubeSongName);
+                                });
+                                break;
+                            }
+                            if (downloadTask.isCancelled()) {
+                                Platform.runLater(() -> {
+                                    text.setText("CANCELED " + currentYoutubeSongName);
+
+                                });
+                                break;
+                            }
+                        }
+                    }).start();
+
                 }
 
-                new Thread(() -> {
-                    while (true) {
-                        if (downloadTask.isDone()) {
-                            Platform.runLater(() -> {
-                                text.setText("DONE " +currentYoutubeSongName);
-                            });
-                            break;
-                        }
-                        if (downloadTask.isCancelled()) {
-                            Platform.runLater(() -> {
-                                text.setText("CANCELED " +currentYoutubeSongName);
-
-                            });
-                            break;
-                        }
-                    }
-                }).start();
-
-            }
         }catch(Exception e ){
-           e.printStackTrace();
+            e.printStackTrace();
+        }
         }
     }
 
