@@ -40,8 +40,7 @@ public class Model {
     public Model(ListView<HBox> downloadList) {
         downloadList.setItems(fileArrayList);
     }
-    public void downloadButtonProcess(TextField urlField) {
-        new Thread(()->{
+    public synchronized void downloadButtonProcess(TextField urlField) {
             Platform.runLater(()->{
                 try {
                     //Wenn der Eingefügt Link nicht leer ist, ein watch? beinhaltet und nicht dem vorgänger entspricht, also bereits in der Liste ist : trage ein in die ListView.
@@ -105,9 +104,6 @@ public class Model {
                     e.printStackTrace();
                 }
             });
-
-        }).start();
-        System.out.println("ENNDD");
     }
 
         private synchronized String determineTitle(String youtubeLink) {
