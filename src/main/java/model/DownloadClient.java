@@ -18,16 +18,14 @@ public class DownloadClient extends Task<Void> {
     private String currentYoutubeLink;
     private int currentFileSize;
     private Long progressIndexL;
-    private WebDriver driver;
-    private WebDriverWait wait;
 
-    public DownloadClient(String currentYoutubeLink, String currentYoutubeSongName){
+    DownloadClient(String currentYoutubeLink, String currentYoutubeSongName){
         this.currentYoutubeLink = currentYoutubeLink;
         this.currentYoutubeSong = currentYoutubeSongName;
 
     }
     @Override
-    protected Void call() {
+    protected synchronized Void call() {
 
         if(System.getProperty("os.name").toLowerCase().contains("win")){
             System.setProperty("webdriver.chrome.driver","src/main/resources/chromedriver.exe");
@@ -39,8 +37,8 @@ public class DownloadClient extends Task<Void> {
 
         ChromeOptions options = new ChromeOptions();
         // options.addArguments("headless");
-        driver = new ChromeDriver(options);
-        wait = new WebDriverWait(driver, 2500);
+        WebDriver driver = new ChromeDriver(options);
+        WebDriverWait wait = new WebDriverWait(driver, 2500);
         driver.get("https://www.youtubeconverter.io/");
 
         try {
@@ -89,6 +87,8 @@ public class DownloadClient extends Task<Void> {
             }
 
             System.out.println("Download done! Please check your path."+ System.getProperty("user.dir")+"/"+""+currentYoutubeSong+".mp3");
+            driver.close();
+
         } catch (IOException e) {
             e.printStackTrace();
         }finally {
@@ -104,10 +104,10 @@ public class DownloadClient extends Task<Void> {
                     fos.close();
                 if(reader!=null)
                     reader.close();
-                if(driver!=null){
-                    driver.quit();
+                if(driver !=null){
+                    //driver.close();
                 }
-                if(wait!=null){
+                if(wait !=null){
                     wait=null;
                 }
 
@@ -118,7 +118,7 @@ public class DownloadClient extends Task<Void> {
         return null;
     }
 
-    private static int getFileSize(URL url) {
+    private synchronized static int getFileSize(URL url) {
         URLConnection conn = null;
         try {
             conn = url.openConnection();

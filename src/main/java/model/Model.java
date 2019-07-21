@@ -34,81 +34,83 @@ import java.util.concurrent.Future;
 public class Model {
     //fileArrayList
     private ObservableList<HBox> fileArrayList = FXCollections.observableArrayList();
-    private Task<Void> downloadTask;
-    private Text text;
     private String currentYoutubeLink="";
-    private String currentYoutubeSongName="";
+
 
     public Model(ListView<HBox> downloadList) {
         downloadList.setItems(fileArrayList);
     }
     public void downloadButtonProcess(TextField urlField) {
-        synchronized (fileArrayList) {
-        try {
-                //Wenn der Eingefügt Link nicht leer ist, ein watch? beinhaltet und nicht dem vorgänger entspricht, also bereits in der Liste ist : trage ein in die ListView.
-                if (!urlField.getText().isEmpty() && urlField.getText().contains("watch?") && !currentYoutubeLink.equals(urlField.getText())) {
+        new Thread(()->{
+            Platform.runLater(()->{
+                try {
+                    //Wenn der Eingefügt Link nicht leer ist, ein watch? beinhaltet und nicht dem vorgänger entspricht, also bereits in der Liste ist : trage ein in die ListView.
+                    if (!urlField.getText().isEmpty() && urlField.getText().contains("watch?") && !currentYoutubeLink.equals(urlField.getText())) {
 
-                    currentYoutubeLink = urlField.getText();
-                    currentYoutubeSongName = Executors.newSingleThreadExecutor().submit(new Callable<String>() {
-                        @Override
-                        public String call() throws Exception {
-                            return determineTitle(currentYoutubeLink);
+                        String currentYoutubeLink = urlField.getText();
+                        String currentYoutubeSongName = Executors.newSingleThreadExecutor().submit(new Callable<String>() {
+                            @Override
+                            public String call() throws Exception {
+                                return determineTitle(currentYoutubeLink);
+                            }
+                        }).get();
+
+                        //currentYoutubeSongName = new Future<String>()  determineTitle(currentYoutubeLink);
+                        System.out.println("Adding " + currentYoutubeSongName + " to downloadList");
+                        Task<Void> downloadTask = new DownloadClient(currentYoutubeLink, currentYoutubeSongName);
+                        Thread downloadThread = new Thread(downloadTask);
+                        HBox hbox = new HBox();
+                        ProgressBar pbar = new ProgressBar();
+                        Text text = new Text();
+                        pbar.setMinHeight(34);
+                        hbox.getChildren().clear();
+                        hbox.getChildren().add(pbar);
+                        text.setText(" " + currentYoutubeSongName);
+
+                        hbox.getChildren().clear();
+                        hbox.getChildren().addAll(pbar, text);
+
+                        fileArrayList.add(hbox);
+
+                        pbar.progressProperty().bind(downloadTask.progressProperty());
+                        downloadThread.start();
+
+                        if (downloadThread.isAlive()) {
+                            pbar.progressProperty().addListener((observable, oldValue, newValue) -> {
+                                text.setText(" " + String.format("%.02f", (newValue.doubleValue() * 100)) + "%/100%" + " name: " + currentYoutubeSongName);
+                            });
                         }
-                    }).get();
 
-                    //currentYoutubeSongName = new Future<String>()  determineTitle(currentYoutubeLink);
-                    System.out.println("Adding " + currentYoutubeSongName + " to downloadList");
-                    downloadTask = new DownloadClient(currentYoutubeLink, currentYoutubeSongName);
-                    Thread downloadThread = new Thread(downloadTask);
-                    HBox hbox = new HBox();
-                    ProgressBar pbar = new ProgressBar();
-                    text = new Text();
-                    pbar.setMinHeight(34);
-                    hbox.getChildren().clear();
-                    hbox.getChildren().add(pbar);
-                    text.setText(" " + currentYoutubeSongName);
+                        new Thread(() -> {
+                            while (true) {
+                                if (downloadTask.isDone()) {
+                                    Platform.runLater(() -> {
+                                        text.setText("DONE " + currentYoutubeSongName);
+                                    });
+                                    break;
+                                }
+                                if (downloadTask.isCancelled()) {
+                                    Platform.runLater(() -> {
+                                        text.setText("CANCELED " + currentYoutubeSongName);
 
-                    hbox.getChildren().clear();
-                    hbox.getChildren().addAll(pbar, text);
+                                    });
+                                    break;
+                                }
+                            }
+                        }).start();
 
-                    fileArrayList.add(hbox);
-
-                    pbar.progressProperty().bind(downloadTask.progressProperty());
-                    downloadThread.start();
-
-                    if (downloadThread.isAlive()) {
-                        pbar.progressProperty().addListener((observable, oldValue, newValue) -> {
-                            text.setText(" " + String.format("%.02f", (newValue.doubleValue() * 100)) + "%/100%" + " name: " + currentYoutubeSongName);
-                        });
                     }
 
-                    new Thread(() -> {
-                        while (true) {
-                            if (downloadTask.isDone()) {
-                                Platform.runLater(() -> {
-                                    text.setText("DONE " + currentYoutubeSongName);
-                                });
-                                break;
-                            }
-                            if (downloadTask.isCancelled()) {
-                                Platform.runLater(() -> {
-                                    text.setText("CANCELED " + currentYoutubeSongName);
-
-                                });
-                                break;
-                            }
-                        }
-                    }).start();
-
+                }catch(Exception e ){
+                    e.printStackTrace();
                 }
+            });
 
-        }catch(Exception e ){
-            e.printStackTrace();
-        }
-        }
+        }).start();
+        System.out.println("ENNDD");
     }
 
-        public synchronized String determineTitle(String youtubeLink) {
+        private synchronized String determineTitle(String youtubeLink) {
             WebClient webClient2=null;
             HtmlPage amnesty=null;
             try {
