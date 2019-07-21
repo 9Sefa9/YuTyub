@@ -28,25 +28,20 @@ public class Controller implements Serializable {
 
     private Model model;
     private Controller controller;
-    private Task<Void> downloadTask;
-    private Thread downloadThread;
-    private HBox hbox;
-    private ProgressBar pbar;
-    private String currentYoutubeLink="";
-    private boolean canProcess=true;
+
     @FXML private Pane pane;
     @FXML private Button deleteButton;
     @FXML private Button downloadButton;
-    @FXML private ListView<String> downloadList;
+    @FXML private ListView<HBox> downloadList;
     @FXML private TextField urlField;
 
     @FXML
-    public void initialize(){
+    public void initialize() {
         model = new Model(downloadList);
         controller = this;
         downloadList.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
-
-        this.getDownloadList().setCellFactory(lv ->{
+    }
+      /*  this.getDownloadList().setCellFactory(lv ->{
             ListCell<String> cell = new ListCell<String>(){
                 @Override
                 protected void updateItem(String newItem, boolean b){
@@ -106,7 +101,7 @@ public class Controller implements Serializable {
             return cell ;
         });
     }
-
+/*
 
 
         /*this.getDownloadList().setCellFactory(c -> {
@@ -195,10 +190,6 @@ public class Controller implements Serializable {
     @FXML
     public void closeProgram(){
         System.exit(0);
-    }
-
-    public synchronized ListView<String> getDownloadList() {
-        return downloadList;
     }
 
 }

@@ -1,7 +1,6 @@
 package model;
 
 import controller.Controller;
-import javafx.application.Platform;
 import javafx.concurrent.Task;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
@@ -13,28 +12,22 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 
 import java.io.*;
 import java.net.*;
-import java.util.Scanner;
 
 public class DownloadClient extends Task<Void> {
+    private String currentYoutubeSong;
+    private String currentYoutubeLink;
     private int currentFileSize;
-    private Controller controller;
     private Long progressIndexL;
-    private WebDriver driver;
-    private WebDriverWait wait;
-    private Scanner input;
-    private String youtubeURL;
-    public DownloadClient(Controller controller, String youtubeURL){
-        this.controller= controller;
-        this.youtubeURL = youtubeURL;
+
+    public DownloadClient(String currentYoutubeLink, String currentYoutubeSongName){
+        this.currentYoutubeLink = currentYoutubeLink;
+        this.currentYoutubeSong = currentYoutubeSongName;
 
     }
     @Override
     protected Void call() {
-//        String fileName = controller.getDownloadList().getItems().get(controller.getDownloadList().getSelectionModel().getSelectedIndex());
 
-        //wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//a[@href='/accounts/login/?source=auth_switcher']"))).click();
-
-        if(System.getProperty("os.name").toLowerCase().indexOf("win")>=0){
+        if(System.getProperty("os.name").toLowerCase().contains("win")){
             System.setProperty("webdriver.chrome.driver","src/main/resources/chromedriver.exe");
         }
         else{
@@ -44,8 +37,8 @@ public class DownloadClient extends Task<Void> {
 
         ChromeOptions options = new ChromeOptions();
         // options.addArguments("headless");
-        driver = new ChromeDriver(options);
-        wait = new WebDriverWait(driver,2500);
+        WebDriver driver = new ChromeDriver(options);
+        WebDriverWait wait = new WebDriverWait(driver, 2500);
         driver.get("https://www.youtubeconverter.io/");
 
         try {
@@ -54,14 +47,14 @@ public class DownloadClient extends Task<Void> {
             e.printStackTrace();
         }
         // Find the yotuubeLink Input
-        WebElement urlLink =driver.findElement(By.xpath("//input[@class='url-input']"));
+        WebElement urlLink = driver.findElement(By.xpath("//input[@class='url-input']"));
         try {
             Thread.sleep(2000);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
         // Enter something to search for
-        urlLink.sendKeys(youtubeURL);
+        urlLink.sendKeys(currentYoutubeLink);
 
 
         try {
@@ -71,18 +64,16 @@ public class DownloadClient extends Task<Void> {
         }
         wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//div[@id='convertBtn']"))).click();
         wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//a[@id='dbtn-mp3128']"))).click();
-        String downloadUrl= wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//a[@class='btn btn-success']"))).getAttribute("href");
-        String songName =  wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//div[@class='c-result__video-title']"))).getText();
-        songName = songName.replaceAll("\\W+","");
+        String successButton= wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//a[@class='btn btn-success']"))).getAttribute("href");
 
-        URL url = null;
+        URL url;
         InputStream reader=null;
         FileOutputStream fos=null;
 
         try {
-            url = new URL(downloadUrl);
+            url = new URL(successButton);
             reader = url.openStream();
-            fos = new FileOutputStream(System.getProperty("user.dir")+"/"+""+songName+".mp3");
+            fos = new FileOutputStream(System.getProperty("user.dir")+"/"+""+this.currentYoutubeSong+".mp3");
 
             int tmp;
             progressIndexL=0L;
@@ -95,7 +86,7 @@ public class DownloadClient extends Task<Void> {
                 updateProgress(progressIndexL,currentFileSize);
             }
 
-            System.out.println("Download done! Please check your path."+ System.getProperty("user.dir")+"/"+""+songName+".mp3");
+            System.out.println("Download done! Please check your path."+ System.getProperty("user.dir")+"/"+""+currentYoutubeSong+".mp3");
         } catch (IOException e) {
             e.printStackTrace();
         }finally {
@@ -104,7 +95,7 @@ public class DownloadClient extends Task<Void> {
                 if(progressIndexL == currentFileSize){
                     // lösche es aus der Liste, da beendet. Vielleicht eine bessere beschreibung ?
                     done();
-                }else if (progressIndexL != currentFileSize){
+                }else {
                     cancel();
                 }
                 if(fos !=null)
