@@ -25,7 +25,7 @@ public class DownloadClient extends Task<Void> {
 
     }
     @Override
-    protected synchronized Void call() {
+    protected Void call() {
 
         if(System.getProperty("os.name").toLowerCase().contains("win")){
             System.setProperty("webdriver.chrome.driver","src/main/resources/chromedriver.exe");
@@ -36,7 +36,7 @@ public class DownloadClient extends Task<Void> {
 
 
         ChromeOptions options = new ChromeOptions();
-        // options.addArguments("headless");
+       // options.addArguments("headless");
         WebDriver driver = new ChromeDriver(options);
         WebDriverWait wait = new WebDriverWait(driver, 2500);
         driver.get("https://www.youtubeconverter.io/");
@@ -87,7 +87,6 @@ public class DownloadClient extends Task<Void> {
             }
 
             System.out.println("Download done! Please check your path."+ System.getProperty("user.dir")+"/"+""+currentYoutubeSong+".mp3");
-            driver.close();
 
         } catch (IOException e) {
             e.printStackTrace();
@@ -105,7 +104,7 @@ public class DownloadClient extends Task<Void> {
                 if(reader!=null)
                     reader.close();
                 if(driver !=null){
-                    //driver.close();
+                    driver.close();
                 }
                 if(wait !=null){
                     wait=null;
