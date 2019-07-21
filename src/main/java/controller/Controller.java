@@ -46,74 +46,63 @@ public class Controller implements Serializable {
         downloadList.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
 
         this.getDownloadList().setCellFactory(lv ->{
-            ListCell<String> cell = new ListCell<>();
-            cell.itemProperty().addListener((obs, oldItem, newItem) -> {
-                if (newItem != null && !newItem.equals(this.currentYoutubeLink)) {
-                    this.currentYoutubeLink = newItem;
+            ListCell<String> cell = new ListCell<String>(){
+                @Override
+                protected void updateItem(String newItem, boolean b){
+                super.updateItem(newItem,newItem == null || b);
+
+                if (newItem != null) {
+                    currentYoutubeLink = newItem;
                     System.out.println("Adding " +newItem+" to downloadList");
 
-                    try {
-                        downloadTask = new DownloadClient(controller, newItem);
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
+                    downloadTask = new DownloadClient(controller, currentYoutubeLink);
                     downloadThread = new Thread(downloadTask);
                     hbox = new HBox();
                     pbar = new ProgressBar();
                     pbar.setMinHeight(34);
 
-
                     hbox.getChildren().clear();
                     hbox.getChildren().add(pbar);
-                    cell.setText(" "+newItem);
-                    cell.setGraphic(hbox);
+                    setText(" " + currentYoutubeLink);
+                    setGraphic(hbox);
 
                     pbar.progressProperty().bind(downloadTask.progressProperty());
                     downloadThread.start();
 
                     if (downloadThread.isAlive()) {
-                        pbar.progressProperty().addListener(new ChangeListener<Number>() {
-                            @Override
-                            public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
-                                cell.setText(" " + (newValue.doubleValue() * 100) + "%/100%" + " name: " + currentYoutubeLink);
-                            }
+                        pbar.progressProperty().addListener((observable, oldValue, newValue) -> {
+                            System.out.println(" " + (newValue.doubleValue() * 100) + "%/100%" + " name: " + currentYoutubeLink);
+                            setText(" " + (newValue.doubleValue() * 100) + "%/100%" + " name: " + currentYoutubeLink);
                         });
                     }
 
-                    new Thread(new Runnable() {
-                        @Override
-                        public void run() {
-                            while (true) {
-                                if (downloadTask.isDone()) {
-                                    Platform.runLater(() -> {
-                                        cell.setText("DONE " +newItem);
-                                        cell.setGraphic(null);
-                                    });
-                                    break;
-                                }
-                                if (downloadTask.isCancelled()) {
-                                    Platform.runLater(() -> {
-                                        cell.setText("CANCELED " +newItem);
-                                        cell.setGraphic(null);
-                                    });
-                                    break;
-                                }
+                    new Thread(() -> {
+                        while (true) {
+                            if (downloadTask.isDone()) {
+                                Platform.runLater(() -> {
+                                    setText("DONE " +newItem);
+                                    setGraphic(null);
+                                });
+                                break;
+                            }
+                            if (downloadTask.isCancelled()) {
+                                Platform.runLater(() -> {
+                                    setText("CANCELED " +newItem);
+                                    setGraphic(null);
+                                });
+                                break;
                             }
                         }
                     }).start();
+                        setText(" " + currentYoutubeLink);
+                        setGraphic(hbox);
 
+                }else{
+                    setText("");
+                    setGraphic(null);
                 }
-            });
-            cell.emptyProperty().addListener((obss, wasEmpty, isEmpty) -> {
-                if (isEmpty) {
-                    cell.setText("");
-                    cell.setGraphic(null);
-                } else {
-                    cell.setText(" "+this.currentYoutubeLink);
-                    cell.setGraphic(hbox);
-                }
-            });
-
+            }
+        };
             return cell ;
         });
     }

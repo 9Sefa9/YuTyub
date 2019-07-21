@@ -23,7 +23,7 @@ public class DownloadClient extends Task<Void> {
     private WebDriverWait wait;
     private Scanner input;
     private String youtubeURL;
-    public DownloadClient(Controller controller, String youtubeURL) throws IOException {
+    public DownloadClient(Controller controller, String youtubeURL){
         this.controller= controller;
         this.youtubeURL = youtubeURL;
 
