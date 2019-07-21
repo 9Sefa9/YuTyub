@@ -34,16 +34,13 @@ public class DownloadClient extends Task<Void> {
 
         //wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//a[@href='/accounts/login/?source=auth_switcher']"))).click();
 
-        switch(System.getProperty("os.name")){
-            case "Linux":{
-                System.setProperty("webdriver.chrome.driver","src/main/resources/chromedriver");
-                break;
-            }
-            case "Windows":{
-                System.setProperty("webdriver.chrome.driver","src/main/resources/chromedriver.exe");
-                break;
-            }
+        if(System.getProperty("os.name").toLowerCase().indexOf("win")>=0){
+            System.setProperty("webdriver.chrome.driver","src/main/resources/chromedriver.exe");
         }
+        else{
+            System.setProperty("webdriver.chrome.driver","src/main/resources/chromedriver");
+        }
+
 
         ChromeOptions options = new ChromeOptions();
         // options.addArguments("headless");
@@ -90,10 +87,13 @@ public class DownloadClient extends Task<Void> {
             int tmp;
             progressIndexL=0L;
             this.currentFileSize = getFileSize(url);
+
             byte[] buffer = new byte[currentFileSize];
             while ((tmp = reader.read(buffer)) != -1) {
                 fos.write(buffer, 0, tmp);
+                progressIndexL+=tmp;
                 updateProgress(progressIndexL,currentFileSize);
+                System.out.println(progressIndexL+"  /  "+currentFileSize);
             }
 
             System.out.println("Download done! Please check your path."+ System.getProperty("user.dir")+"/"+""+songName+".mp3");

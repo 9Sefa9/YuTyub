@@ -32,6 +32,7 @@ public class Controller implements Serializable {
     private Thread downloadThread;
     private HBox hbox;
     private ProgressBar pbar;
+    private boolean canProcess=true;
     @FXML private Pane pane;
     @FXML private Button deleteButton;
     @FXML private Button downloadButton;
@@ -44,17 +45,91 @@ public class Controller implements Serializable {
         controller = this;
         downloadList.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
 
-        this.getDownloadList().setCellFactory(c -> {
+        this.getDownloadList().setCellFactory(lv ->{
+            ListCell<String> cell = new ListCell<>();
+            cell.itemProperty().addListener((obs, oldItem, newItem) -> {
+                if (newItem != null && canProcess) {
+                    System.out.println("Adding " +newItem+" to downloadList");
+
+                    try {
+                        downloadTask = new DownloadClient(controller, newItem);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                    downloadThread = new Thread(downloadTask);
+                    hbox = new HBox();
+                    pbar = new ProgressBar();
+                    pbar.setMinHeight(34);
+
+
+                    hbox.getChildren().clear();
+                    hbox.getChildren().add(pbar);
+                    cell.setText(" "+newItem);
+                    cell.setGraphic(hbox);
+
+                    pbar.progressProperty().bind(downloadTask.progressProperty());
+                    downloadThread.start();
+
+                    if (downloadThread.isAlive()) {
+                        pbar.progressProperty().addListener(new ChangeListener<Number>() {
+                            @Override
+                            public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
+                                cell.setText(" " + (newValue.doubleValue() * 100) + "%/100%" + " name: " + newItem);
+                            }
+                        });
+                    }
+
+                    new Thread(new Runnable() {
+                        @Override
+                        public void run() {
+                            while (true) {
+                                if (downloadTask.isDone()) {
+                                    Platform.runLater(() -> {
+                                        cell.setText("DONE " +newItem);
+                                        cell.setGraphic(null);
+                                    });
+                                    break;
+                                }
+                                if (downloadTask.isCancelled()) {
+                                    Platform.runLater(() -> {
+                                        cell.setText("CANCELED " +newItem);
+                                        cell.setGraphic(null);
+                                    });
+                                    break;
+                                }
+                            }
+                        }
+                    }).start();
+                    canProcess = false;
+
+                }else{
+                    cell.setText("");
+                    cell.setGraphic(null);
+                }
+            });
+            cell.emptyProperty().addListener((obss, wasEmpty, isEmpty) -> {
+                if (isEmpty) {
+                    cell.setGraphic(null);
+                } else {
+                    cell.setGraphic(hbox);
+                }
+            });
+            cell.setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
+            return cell ;
+        });
+    }
+
+
+
+        /*this.getDownloadList().setCellFactory(c -> {
             ListCell<String> cell = new ListCell<String>() {
                 @Override
                 protected void updateItem(String myObject, boolean b) {
-                    super.updateItem(myObject, myObject == null || b);
+                    super.updateItem(myObject, b);
                     try {
-                        String path = DownloadClient.class.getProtectionDomain().getCodeSource().getLocation().getPath();
-                        String decodedPath = URLDecoder.decode(path, "UTF-8");
 
-                        if (myObject != null && !new File(decodedPath + myObject).exists()) {
-                            System.out.println(myObject);
+                        if (myObject != null) {
+                            System.out.println("Adding " +myObject+" to downloadList");
 
                             downloadTask = new DownloadClient(controller, myObject);
                             downloadThread = new Thread(downloadTask);
@@ -65,7 +140,7 @@ public class Controller implements Serializable {
 
                             hbox.getChildren().clear();
                             hbox.getChildren().add(pbar);
-                            setText(" " + myObject);
+                            setText(" "+myObject);
                             setGraphic(hbox);
 
                             pbar.progressProperty().bind(downloadTask.progressProperty());
@@ -85,14 +160,14 @@ public class Controller implements Serializable {
                                 while (true) {
                                     if (downloadTask.isDone()) {
                                         Platform.runLater(() -> {
-                                            setText("Download done:" + myObject);
+                                            setText("DONE " + myObject);
                                             setGraphic(null);
                                         });
                                         break;
                                     }
                                     if (downloadTask.isCancelled()) {
                                         Platform.runLater(() -> {
-                                            setText("Download canceled!:" + myObject);
+                                            setText("CANCELED " + myObject);
                                             setGraphic(null);
                                         });
                                         break;
@@ -115,12 +190,12 @@ public class Controller implements Serializable {
             };
             return cell;
         });
-    }
+    */
     @FXML
     private void downloadButtonAction() { this.model.downloadButtonProcess(urlField); }
     @FXML
     public void deleteButtonAction(){
-       this.model.deleteButtonProcess();
+       this.model.deleteButtonProcess(this.downloadList);
     }
     @FXML
     public void windowDragged(MouseEvent event){ this.model.windowDraggedProcess(event);}

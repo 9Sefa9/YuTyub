@@ -26,18 +26,9 @@ public class Model {
     public void downloadButtonProcess(TextField urlField) {
         try {
 
-            if(!urlField.getText().isEmpty()){
+            if(!urlField.getText().isEmpty() && urlField.getText().contains("watch?")){
                 fileArrayList.add(urlField.getText());
             }
-            //Observable
-          //  this.uploadList.setItems(model.getFileArrayList());
-
-            //Choose one File
-            //fileChooser = new FileChooser();
-           // fileChooser.setTitle("SELECT YOUR FILES!");
-            //fileList = fileChooser.showOpenMultipleDialog(new Stage());
-
-            //model.getFileArrayList().addAll(fileList);
 
         }catch(Exception e ){
            e.printStackTrace();
@@ -85,6 +76,11 @@ public class Model {
 
     }
 
-    public void deleteButtonProcess() {
+    public void deleteButtonProcess(ListView<String> downloadList) {
+        downloadList.getItems().remove(downloadList.getSelectionModel().getSelectedItem());
+    }
+
+    public ObservableList<String> getFileArrayList() {
+        return fileArrayList;
     }
 }
